@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Solver</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Matrix Solver</h1>
+
+        <div class="input-section">
+            <label for="rows">Rows:</label>
+            <select id="rows">
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+            </select>
+
+            <label for="cols">Columns:</label>
+            <select id="cols">
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+            </select>
+
+            <button id="generateMatrix">Generate Matrix</button>
+        </div>
+
+        <form id="matrix-form">
+            <div id="matrix-container">
+                <!-- Generated matrix fields will go here -->
+            </div>
+        </form>
+
+        <button id="solveMatrix">Solve</button>
+
+        <h3>Result:</h3>
+        <textarea id="solution" readonly></textarea>
+    </div>
+
+    <footer>
+        Made by Tornio
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+</html>
