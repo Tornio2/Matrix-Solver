@@ -101,7 +101,10 @@ function swapRows(matrix, row1, row2) {
     matrix[row2] = temp;
 }
 
-// Format matrix for displaying the solution
+// Format matrix 
 function formatMatrix(matrix) {
-    return matrix.map(row => row.join('\t')).join('\n');
+    return matrix.map(row => {
+        const constants = row.pop();
+        return row.join('  ') + ' | ' + constants; 
+    }).join('\n');
 }
