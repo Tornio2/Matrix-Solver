@@ -6,46 +6,81 @@
     <title>Matrix Solver</title>
     <link rel="stylesheet" href="style-lavender.css">
     <link rel="icon" href="img/icon.png" type="image/icon type">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.0.0/math.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Matrix Solver</h1>
+        <h1>Matrix Calculator</h1>
 
         <div class="input-section">
-            <label for="rows">Rows:</label>
-            <select id="rows">
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-                <option value="9">9</option>
-                <option value="10">10</option>
+            <label for="operation">Operation:</label>
+            <select id="operation">
+                <option value="gauss">Gauss-Jordan Elimination</option>
+                <option value="multiplication">Matrix Multiplication</option>
             </select>
-
-            <label for="cols">Columns:</label>
-            <select id="cols">
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-                <option value="9">9</option>
-                <option value="10">10</option>
-            </select>
-
-            <button id="generateMatrix">Generate Matrix</button>
         </div>
 
-        <form id="matrix-form">
-            <div id="matrix-container">
-                <!-- Generated matrix fields will go here -->
+        <div id="gauss-section">
+            <div class="input-section">
+                <label for="rows">Rows:</label>
+                <select id="rows">
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+
+                <label for="cols">Columns:</label>
+                <select id="cols">
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+
+                <button id="generateGaussMatrix">Generate Matrix</button>
             </div>
-        </form>
+            <div id="gauss-matrix-container"></div>
+        </div>
+
+        <div id="multiplication-section" class="multiplication-section">
+            <div class="input-section">
+                <label for="matrix1-rows">Matrix 1 Rows:</label>
+                <select id="matrix1-rows">
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+
+                <label for="matrix1-cols">Matrix 1 Columns:</label>
+                <select id="matrix1-cols">
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+
+                <label for="matrix2-cols">Matrix 2 Columns:</label>
+                <select id="matrix2-cols">
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+
+                <button id="generateMultiplicationMatrices">Generate Matrices</button>
+            </div>
+            <div class="matrix-container">
+                <div class="matrix-label">Matrix 1</div>
+                <div id="matrix1-container"></div>
+            </div>
+            <div class="matrix-container">
+                <div class="matrix-label">Matrix 2</div>
+                <div id="matrix2-container"></div>
+            </div>
+        </div>
 
         <button id="solveMatrix">Solve</button>
 
