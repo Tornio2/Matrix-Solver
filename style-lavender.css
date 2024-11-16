@@ -110,6 +110,27 @@ footer:hover {
     color: #5e3a87; 
 }
 
+.multiplication-section {
+    display: none;
+}
+
+.matrix-container {
+    display: inline-block;
+    margin: 20px;
+    vertical-align: top;
+}
+
+.matrix-label {
+    font-weight: bold;
+    color: #5e3a87;
+    margin-bottom: 10px;
+}
+
+/* Ensure new matrix containers inherit the styling of the original */
+#matrix1-container, #matrix2-container {
+    margin: 20px 0;
+}
+
 /* Keyframe Animations */
 @keyframes fadeIn {
     0% {
