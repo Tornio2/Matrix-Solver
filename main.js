@@ -1,22 +1,22 @@
   // Algebraic Expression Handler
-  class AlgebraicTerm {
+class AlgebraicTerm {
     constructor(coefficient = 0, variables = {}) {
         this.coefficient = coefficient;
-        this.variables = variables; // Format: {x: 1, y: 2} means x¹y²
+        this.variables = variables; // Format: {x: 1, y: 2} means x^1 y^2
     }
 
     static parse(input) {
         input = input.trim();
         if (input === '') return new AlgebraicTerm(0);
-
+    
         // Handle pure numbers
         if (!isNaN(input)) {
             return new AlgebraicTerm(parseFloat(input));
         }
-
+    
         let coefficient = 1;
         let variables = {};
-
+    
         // Split the input into coefficient and variables
         const parts = input.match(/^(-?\d*\.?\d*)?([a-zA-Z].*)$/);
         
@@ -26,13 +26,13 @@
             } else if (parts[1] === '-') {
                 coefficient = -1;
             }
-
+    
             // Parse variables and their powers
             const varPart = parts[2];
             let currentVar = null;
             let powerAccumulator = '';
             let parsingPower = false;
-
+    
             for (let i = 0; i < varPart.length; i++) {
                 const char = varPart[i];
                 
@@ -43,30 +43,34 @@
                 
                 if (char.match(/[a-zA-Z]/)) {
                     if (currentVar !== null && powerAccumulator) {
-                        variables[currentVar] = parseInt(powerAccumulator) || 1;
+                        variables[currentVar] = parseInt(powerAccumulator);
                         powerAccumulator = '';
                     }
                     currentVar = char;
                     parsingPower = false;
-                    if (i === varPart.length - 1) {
-                        variables[char] = (variables[char] || 0) + 1;
+                    // Only set to 1 if we're at the end AND we haven't seen a power
+                    if (i === varPart.length - 1 && !parsingPower) {
+                        variables[char] = 1; 
                     }
                 } else if (char.match(/\d/) && parsingPower) {
                     powerAccumulator += char;
                     if (i === varPart.length - 1) {
-                        variables[currentVar] = parseInt(powerAccumulator) || 1;
+                        variables[currentVar] = parseInt(powerAccumulator);
                     }
                 }
             }
-
-            // Handle any remaining variable without explicit power
+    
+            // Handle any remaining variable without power - set power to 1
             if (currentVar && !powerAccumulator) {
-                variables[currentVar] = (variables[currentVar] || 0) + 1;
+                variables[currentVar] = 1;
             }
         }
-
+    
+        console.log('Parsing:', input, '→', { coefficient, variables });
+    
         return new AlgebraicTerm(coefficient, variables);
     }
+    
 
     add(other) {
         if (this.sameVariables(other)) {
@@ -75,16 +79,32 @@
         return null; // Cannot add terms with different variables
     }
 
+
     multiply(other) {
-        const newCoefficient = this.coefficient * other.coefficient;
-        const newVariables = {...this.variables};
+        // For debugging
+        console.log('Multiplying terms:');
+        console.log('This term variables:', this.variables);
+        console.log('Other term variables:', other.variables);
         
-        for (let [variable, power] of Object.entries(other.variables)) {
+        // Multiply coefficients
+        const newCoefficient = this.coefficient * other.coefficient;
+        
+        // Create a new variables object
+        const newVariables = {};
+        
+        // Add this term's variables first
+        for (const [variable, power] of Object.entries(this.variables)) {
+            newVariables[variable] = power;
+        }
+        
+        // Add other term's variables, combining powers
+        for (const [variable, power] of Object.entries(other.variables)) {
             newVariables[variable] = (newVariables[variable] || 0) + power;
         }
-
+        
         return new AlgebraicTerm(newCoefficient, newVariables);
     }
+    
 
     sameVariables(other) {
         const vars1 = Object.entries(this.variables).sort().toString();
@@ -212,57 +232,122 @@ function solveGaussJordan() {
     document.getElementById('solution').value = formatMatrix(matrix);
 }
 
+// UI handler for matrix multiplication
 function solveMultiplication() {
     const rows1 = parseInt(document.getElementById('matrix1-rows').value);
     const cols1 = parseInt(document.getElementById('matrix1-cols').value);
     const cols2 = parseInt(document.getElementById('matrix2-cols').value);
 
-    let matrix1 = [];
-    for (let i = 0; i < rows1; i++) {
-        let row = [];
-        for (let j = 0; j < cols1; j++) {
-            const value = document.getElementById(`matrix1-${i}-${j}`).value;
-            row.push(AlgebraicTerm.parse(value));
-        }
-        matrix1.push(row);
-    }
+    // Read first matrix
+    const matrix1 = Array(rows1).fill().map((_, i) =>
+        Array(cols1).fill().map((_, j) => 
+            AlgebraicTerm.parse(document.getElementById(`matrix1-${i}-${j}`).value)
+        )
+    );
 
-    let matrix2 = [];
-    for (let i = 0; i < cols1; i++) {
-        let row = [];
-        for (let j = 0; j < cols2; j++) {
-            const value = document.getElementById(`matrix2-${i}-${j}`).value;
-            row.push(AlgebraicTerm.parse(value));
-        }
-        matrix2.push(row);
-    }
+    // Read second matrix
+    const matrix2 = Array(cols1).fill().map((_, i) =>
+        Array(cols2).fill().map((_, j) =>
+            AlgebraicTerm.parse(document.getElementById(`matrix2-${i}-${j}`).value)
+        )
+    );
 
+    // Calculate and display result
     const result = multiplyMatrices(matrix1, matrix2);
     document.getElementById('solution').value = formatMultiplicationResult(result);
 }
 
+// Main matrix multiplication function
 function multiplyMatrices(matrix1, matrix2) {
-    const result = [];
-    for (let i = 0; i < matrix1.length; i++) {
-        result[i] = [];
-        for (let j = 0; j < matrix2[0].length; j++) {
-            let sum = new AlgebraicTerm(0);
-            for (let k = 0; k < matrix1[0].length; k++) {
-                const product = matrix1[i][k].multiply(matrix2[k][j]);
-                if (sum.sameVariables(product)) {
-                    sum = sum.add(product);
-                } else if (sum.coefficient === 0) {
-                    sum = product;
-                } else {
-                    // If terms can't be combined, represent as a sum
-                    sum = new AlgebraicTerm(sum.coefficient + product.coefficient, 
-                                          {...sum.variables, ...product.variables});
-                }
-            }
-            result[i][j] = sum;
+    const rows1 = matrix1.length;
+    const cols1 = matrix1[0].length;
+    const cols2 = matrix2[0].length;
+    
+    // Create result matrix filled with zero terms
+    const result = createZeroMatrix(rows1, cols2);
+    
+    // Perform matrix multiplication
+    for (let i = 0; i < rows1; i++) {
+        for (let j = 0; j < cols2; j++) {
+            // Calculate each cell
+            result[i][j] = calculateCell(matrix1[i], getColumn(matrix2, j));
         }
     }
+    
     return result;
+}
+
+// Helper function to create a zero filled matrix
+function createZeroMatrix(rows, cols) {
+    return Array(rows).fill().map(() => 
+        Array(cols).fill().map(() => new AlgebraicTerm(0))
+    );
+}
+
+// Helper function to get a column from matrix
+function getColumn(matrix, colIndex) {
+    return matrix.map(row => row[colIndex]);
+}
+
+// Calculate single cell value by multiplying row and column
+function calculateCell(row, column) {
+    let terms = [];
+    
+    // Calculate all products first
+    for (let i = 0; i < row.length; i++) {
+        const product = row[i].multiply(column[i]);
+        if (product.coefficient !== 0) {
+            // Try to combine with existing terms
+            let combined = false;
+            for (let j = 0; j < terms.length; j++) {
+                if (terms[j].sameVariables(product)) {
+                    terms[j] = terms[j].add(product);
+                    combined = true;
+                    break;
+                }
+            }
+            if (!combined) {
+                terms.push(product);
+            }
+        }
+    }
+
+    // If no terms, return zero
+    if (terms.length === 0) {
+        return new AlgebraicTerm(0);
+    }
+
+    // If only one term, return it
+    if (terms.length === 1) {
+        return terms[0];
+    }
+
+    // Combine terms into a string representation
+    const termStrings = terms.map(term => term.toString());
+    const combinedString = termStrings.join(' + ').replace(/\+ -/g, '- ');
+    
+    // Create a special term that will be displayed properly
+    const result = new AlgebraicTerm(1);
+    result.toString = () => combinedString;
+    
+    return result;
+}
+
+// Helper function to combine variable powers
+function combinedVariables(vars1, vars2) {
+    const combined = {...vars1};
+    
+    // Add powers from second term
+    for (const [variable, power] of Object.entries(vars2)) {
+        if (power !== 0) {
+            combined[variable] = (combined[variable] || 0) + power;
+        }
+    }
+    
+    // Remove variables with power 0
+    return Object.fromEntries(
+        Object.entries(combined).filter(([_, power]) => power !== 0)
+    );
 }
 
 function gaussJordan(matrix, rows, cols) {
@@ -294,6 +379,7 @@ function gaussJordan(matrix, rows, cols) {
         }
     }
 }
+
 
 
 function formatMatrix(matrix) {
